@@ -3,7 +3,7 @@ package nats
 import (
 	"context"
 
-	"github.com/crypto-bundle/bc-wallet-common/pkg/queue"
+	"github.com/cryptowize-tech/bc-wallet-common/pkg/queue"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"
@@ -21,10 +21,10 @@ type jsConsumerWorkerWrapper struct {
 	maxRedeliveryCount uint64
 }
 
-func (ww *jsConsumerWorkerWrapper) Run(ctx context.Context) {
+func (ww *jsConsumerWorkerWrapper) Start() {
 	for {
 		select {
-		case <-ctx.Done():
+		case <-ww.stopWorkerChanel:
 			ww.logger.Info("consumer worker. received close worker message")
 			return
 
@@ -37,10 +37,6 @@ func (ww *jsConsumerWorkerWrapper) Run(ctx context.Context) {
 			ww.processMsg(v)
 		}
 	}
-}
-
-func (ww *jsConsumerWorkerWrapper) ProcessMsg(msg *nats.Msg) {
-	ww.processMsg(msg)
 }
 
 func (ww *jsConsumerWorkerWrapper) processMsg(msg *nats.Msg) {
