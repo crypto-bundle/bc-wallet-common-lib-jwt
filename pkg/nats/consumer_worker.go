@@ -3,7 +3,7 @@ package nats
 import (
 	"context"
 
-	"github.com/cryptowize-tech/bc-wallet-common/pkg/queue"
+	"github.com/crypto-bundle/bc-wallet-common/pkg/queue"
 
 	"github.com/nats-io/nats.go"
 	"go.uber.org/zap"

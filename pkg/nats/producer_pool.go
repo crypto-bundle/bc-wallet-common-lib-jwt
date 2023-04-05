@@ -2,10 +2,10 @@ package nats
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"sync/atomic"
 
 	"github.com/nats-io/nats.go"
+	"go.uber.org/zap"
 )
 
 // producerWorkerPool is a minimal Worker implementation that simply wraps a

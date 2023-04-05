@@ -3,10 +3,10 @@ package nats
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"sync/atomic"
 
 	"github.com/nats-io/nats.go"
+	"go.uber.org/zap"
 )
 
 // jsProducerWorkerPool is a minimal Worker implementation that simply wraps a
