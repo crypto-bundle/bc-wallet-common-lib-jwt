@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
-	"github.com/google/uuid"
 )
 
 const (
@@ -23,7 +22,7 @@ type service struct {
 	secret string
 }
 
-func (s *service) GetTokenData(accessToken string) (map[string]uuid.UUID, error) {
+func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
 	token, err := jwt.ParseWithClaims(accessToken,
 		&tokenClaim{},
 		func(token *jwt.Token) (interface{}, error) {
@@ -36,6 +35,10 @@ func (s *service) GetTokenData(accessToken string) (map[string]uuid.UUID, error)
 		},
 	)
 	if err != nil {
+		return nil, ErrInvalidToken
+	}
+
+	if !token.Valid {
 		return nil, ErrInvalidToken
 	}
 

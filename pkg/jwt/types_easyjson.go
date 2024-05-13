@@ -4,7 +4,6 @@ package jwt
 
 import (
 	json "encoding/json"
-	uuid "github.com/google/uuid"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -37,20 +36,18 @@ func easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(in *j
 			continue
 		}
 		switch key {
-		case "uuid_map":
+		case "values_map":
 			if in.IsNull() {
 				in.Skip()
 			} else {
 				in.Delim('{')
-				out.UUIDMap = make(map[string]uuid.UUID)
+				out.ValuesMap = make(map[string]string)
 				for !in.IsDelim('}') {
 					key := string(in.String())
 					in.WantColon()
-					var v1 uuid.UUID
-					if data := in.UnsafeBytes(); in.Ok() {
-						in.AddError((v1).UnmarshalText(data))
-					}
-					(out.UUIDMap)[key] = v1
+					var v1 string
+					v1 = string(in.String())
+					(out.ValuesMap)[key] = v1
 					in.WantComma()
 				}
 				in.Delim('}')
@@ -70,14 +67,14 @@ func easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(out *
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"uuid_map\":"
+		const prefix string = ",\"values_map\":"
 		out.RawString(prefix[1:])
-		if in.UUIDMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+		if in.ValuesMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
 			out.RawString(`null`)
 		} else {
 			out.RawByte('{')
 			v2First := true
-			for v2Name, v2Value := range in.UUIDMap {
+			for v2Name, v2Value := range in.ValuesMap {
 				if v2First {
 					v2First = false
 				} else {
@@ -85,7 +82,7 @@ func easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(out *
 				}
 				out.String(string(v2Name))
 				out.RawByte(':')
-				out.RawText((v2Value).MarshalText())
+				out.String(string(v2Value))
 			}
 			out.RawByte('}')
 		}

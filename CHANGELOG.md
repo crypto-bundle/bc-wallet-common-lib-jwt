@@ -4,7 +4,7 @@
 ### Info
 * lib-jwt move to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-jwt
 
-## [v0.0.2] - 13.05.2024
+## [v0.0.2, v0.0.3] - 13.05.2024
 ### Changed
 * Added JWT typical config struct
 * Re-worked of custom claim - added Claim Builder service
