@@ -4,7 +4,7 @@ package jwt
 
 import (
 	json "encoding/json"
-	_v4 "github.com/golang-jwt/jwt/v4"
+	uuid "github.com/google/uuid"
 	easyjson "github.com/mailru/easyjson"
 	jlexer "github.com/mailru/easyjson/jlexer"
 	jwriter "github.com/mailru/easyjson/jwriter"
@@ -18,7 +18,7 @@ var (
 	_ easyjson.Marshaler
 )
 
-func easyjson6601e8cdDecodeGithubComCryptowizeTechBcWalletCommonPkgJwt(in *jlexer.Lexer, out *CustomClaims) {
+func easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(in *jlexer.Lexer, out *tokenClaim) {
 	isTopLevel := in.IsStart()
 	if in.IsNull() {
 		if isTopLevel {
@@ -37,56 +37,24 @@ func easyjson6601e8cdDecodeGithubComCryptowizeTechBcWalletCommonPkgJwt(in *jlexe
 			continue
 		}
 		switch key {
-		case "merchant_id":
-			if data := in.UnsafeBytes(); in.Ok() {
-				in.AddError((out.MerchantUUID).UnmarshalText(data))
-			}
-		case "iss":
-			out.Issuer = string(in.String())
-		case "sub":
-			out.Subject = string(in.String())
-		case "aud":
-			if data := in.Raw(); in.Ok() {
-				in.AddError((out.Audience).UnmarshalJSON(data))
-			}
-		case "exp":
+		case "uuid_map":
 			if in.IsNull() {
 				in.Skip()
-				out.ExpiresAt = nil
 			} else {
-				if out.ExpiresAt == nil {
-					out.ExpiresAt = new(_v4.NumericDate)
+				in.Delim('{')
+				out.UUIDMap = make(map[string]uuid.UUID)
+				for !in.IsDelim('}') {
+					key := string(in.String())
+					in.WantColon()
+					var v1 uuid.UUID
+					if data := in.UnsafeBytes(); in.Ok() {
+						in.AddError((v1).UnmarshalText(data))
+					}
+					(out.UUIDMap)[key] = v1
+					in.WantComma()
 				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.ExpiresAt).UnmarshalJSON(data))
-				}
+				in.Delim('}')
 			}
-		case "nbf":
-			if in.IsNull() {
-				in.Skip()
-				out.NotBefore = nil
-			} else {
-				if out.NotBefore == nil {
-					out.NotBefore = new(_v4.NumericDate)
-				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.NotBefore).UnmarshalJSON(data))
-				}
-			}
-		case "iat":
-			if in.IsNull() {
-				in.Skip()
-				out.IssuedAt = nil
-			} else {
-				if out.IssuedAt == nil {
-					out.IssuedAt = new(_v4.NumericDate)
-				}
-				if data := in.Raw(); in.Ok() {
-					in.AddError((*out.IssuedAt).UnmarshalJSON(data))
-				}
-			}
-		case "jti":
-			out.ID = string(in.String())
 		default:
 			in.SkipRecursive()
 		}
@@ -97,73 +65,54 @@ func easyjson6601e8cdDecodeGithubComCryptowizeTechBcWalletCommonPkgJwt(in *jlexe
 		in.Consumed()
 	}
 }
-func easyjson6601e8cdEncodeGithubComCryptowizeTechBcWalletCommonPkgJwt(out *jwriter.Writer, in CustomClaims) {
+func easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(out *jwriter.Writer, in tokenClaim) {
 	out.RawByte('{')
 	first := true
 	_ = first
 	{
-		const prefix string = ",\"merchant_id\":"
+		const prefix string = ",\"uuid_map\":"
 		out.RawString(prefix[1:])
-		out.RawText((in.MerchantUUID).MarshalText())
-	}
-	if in.Issuer != "" {
-		const prefix string = ",\"iss\":"
-		out.RawString(prefix)
-		out.String(string(in.Issuer))
-	}
-	if in.Subject != "" {
-		const prefix string = ",\"sub\":"
-		out.RawString(prefix)
-		out.String(string(in.Subject))
-	}
-	if len(in.Audience) != 0 {
-		const prefix string = ",\"aud\":"
-		out.RawString(prefix)
-		out.Raw((in.Audience).MarshalJSON())
-	}
-	if in.ExpiresAt != nil {
-		const prefix string = ",\"exp\":"
-		out.RawString(prefix)
-		out.Raw((*in.ExpiresAt).MarshalJSON())
-	}
-	if in.NotBefore != nil {
-		const prefix string = ",\"nbf\":"
-		out.RawString(prefix)
-		out.Raw((*in.NotBefore).MarshalJSON())
-	}
-	if in.IssuedAt != nil {
-		const prefix string = ",\"iat\":"
-		out.RawString(prefix)
-		out.Raw((*in.IssuedAt).MarshalJSON())
-	}
-	if in.ID != "" {
-		const prefix string = ",\"jti\":"
-		out.RawString(prefix)
-		out.String(string(in.ID))
+		if in.UUIDMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+			out.RawString(`null`)
+		} else {
+			out.RawByte('{')
+			v2First := true
+			for v2Name, v2Value := range in.UUIDMap {
+				if v2First {
+					v2First = false
+				} else {
+					out.RawByte(',')
+				}
+				out.String(string(v2Name))
+				out.RawByte(':')
+				out.RawText((v2Value).MarshalText())
+			}
+			out.RawByte('}')
+		}
 	}
 	out.RawByte('}')
 }
 
 // MarshalJSON supports json.Marshaler interface
-func (v CustomClaims) MarshalJSON() ([]byte, error) {
+func (v tokenClaim) MarshalJSON() ([]byte, error) {
 	w := jwriter.Writer{}
-	easyjson6601e8cdEncodeGithubComCryptowizeTechBcWalletCommonPkgJwt(&w, v)
+	easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(&w, v)
 	return w.Buffer.BuildBytes(), w.Error
 }
 
 // MarshalEasyJSON supports easyjson.Marshaler interface
-func (v CustomClaims) MarshalEasyJSON(w *jwriter.Writer) {
-	easyjson6601e8cdEncodeGithubComCryptowizeTechBcWalletCommonPkgJwt(w, v)
+func (v tokenClaim) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(w, v)
 }
 
 // UnmarshalJSON supports json.Unmarshaler interface
-func (v *CustomClaims) UnmarshalJSON(data []byte) error {
+func (v *tokenClaim) UnmarshalJSON(data []byte) error {
 	r := jlexer.Lexer{Data: data}
-	easyjson6601e8cdDecodeGithubComCryptowizeTechBcWalletCommonPkgJwt(&r, v)
+	easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(&r, v)
 	return r.Error()
 }
 
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
-func (v *CustomClaims) UnmarshalEasyJSON(l *jlexer.Lexer) {
-	easyjson6601e8cdDecodeGithubComCryptowizeTechBcWalletCommonPkgJwt(l, v)
+func (v *tokenClaim) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(l, v)
 }
