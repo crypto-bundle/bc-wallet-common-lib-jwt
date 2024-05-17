@@ -12,3 +12,9 @@
   * Removed logger dependency
   * Added GenerateJWT receiver method
   * Added GetTokenData receiver method
+
+## [v0.0.4] - 18.05.2024
+### Changed
+* Claim builder now internal part of jwt package
+* Changd GenerateJWT method of jwt-service:
+  * New signature - `GenerateJWT(expiredAt time.Time, values map[string]string) (string, error)`

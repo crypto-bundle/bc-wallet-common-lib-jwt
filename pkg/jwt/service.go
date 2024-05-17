@@ -50,8 +50,11 @@ func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
 	return claim.GetAllData(), nil
 }
 
-func (s *service) GenerateJWT(claim tokenClaimBuilderService) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
+func (s *service) GenerateJWT(expiredAt time.Time, values map[string]string) (string, error) {
+	claimBuilder := newTokenClaimBuilder(expiredAt)
+	claimBuilder.SetValues(values)
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimBuilder)
 
 	return token.SignedString([]byte(s.secret))
 }
