@@ -16,8 +16,8 @@ var (
 )
 
 const (
-	MerchantUUIDLabel = "merchant_uuid"
-	ExpiredAtLabel    = "expired_at"
+	merchantUUIDLabel = "merchant_uuid"
+	expiredAtLabel    = "expired_at"
 )
 
 func main() {
@@ -43,19 +43,11 @@ func main() {
 		mExpTime = expTime
 	}
 
-	claimBuilder := jwttool.NewTokenClaimBuilder(mExpTime)
-	err := claimBuilder.AddData(MerchantUUIDLabel, uuid)
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-
-	err = claimBuilder.AddData(ExpiredAtLabel, mExpTime.String())
-	if err != nil {
-		log.Fatalf("%s", err)
-	}
-
 	jwtSvc := jwttool.NewJWTService(key)
-	token, err := jwtSvc.GenerateJWT(claimBuilder)
+	token, err := jwtSvc.GenerateJWT(mExpTime, map[string]string{
+		merchantUUIDLabel: uuid,
+		expiredAtLabel:    mExpTime.Format(time.DateTime),
+	})
 	if err != nil {
 		log.Fatalf("cant make JWT token. Error: %v ", err.Error())
 	}
@@ -67,5 +59,5 @@ func main() {
 		log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
 	}
 
-	log.Println("Origin data from token: ", data[MerchantUUIDLabel], data[ExpiredAtLabel])
+	log.Println("Origin data from token: ", data[merchantUUIDLabel], data[expiredAtLabel])
 }
