@@ -60,4 +60,4 @@ func main() {
 
 ## Licence
 
-**bc-wallet-common-lib-jwt** is licensed under the [MIT](./LICENSE) License.
+**bc-wallet-common-lib-jwt** is licensed under the [MIT NON-AI](./LICENSE) License.

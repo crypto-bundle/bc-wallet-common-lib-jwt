@@ -19,6 +19,8 @@ var (
 )
 
 type service struct {
+	e errorFormatterService
+
 	secret string
 }
 
@@ -59,7 +61,9 @@ func (s *service) GenerateJWT(expiredAt time.Time, values map[string]string) (st
 	return token.SignedString([]byte(s.secret))
 }
 
-func NewJWTService(secret string) (s *service) {
+func NewJWTService(errFmtSvc errorFormatterService,
+	secret string,
+) (s *service) {
 	s = &service{
 		secret: secret,
 	}
