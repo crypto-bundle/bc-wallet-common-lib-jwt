@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/crypto-bundle/bc-wallet-common-lib-jwt/internal/mockerrors"
+
 	jwttool "github.com/crypto-bundle/bc-wallet-common-lib-jwt/pkg/jwt"
 
 	_ "github.com/mailru/easyjson/gen"
@@ -29,11 +31,13 @@ func main() {
 	flag.StringVar(&uuid, "uuid", "", "merchant uuid")
 	flag.StringVar(&expiration, "expiration", "", "expiration date with format: '2006-01-02'")
 	flag.Parse()
+
 	if key == "" {
 		log.Fatalf("missing required -%v argument/flag\n", "key")
 	}
 
 	mExpTime := time.Now().Add(jwttool.LongLiveTokenDuration)
+
 	if expiration != "" {
 		expTime, innerErr := time.Parse("2006-01-02", expiration)
 		if innerErr != nil {
@@ -43,7 +47,8 @@ func main() {
 		mExpTime = expTime
 	}
 
-	jwtSvc := jwttool.NewJWTService(key)
+	jwtSvc := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
+
 	token, err := jwtSvc.GenerateJWT(mExpTime, map[string]string{
 		merchantUUIDLabel: uuid,
 		expiredAtLabel:    mExpTime.Format(time.DateTime),

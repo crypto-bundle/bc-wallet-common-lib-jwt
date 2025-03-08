@@ -1,8 +1,39 @@
+/*
+ *
+ *
+ * MIT NON-AI License
+ *
+ * Copyright (c) 2022-2025 Aleksei Kotelnikov(gudron2s@gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of the software and associated documentation files (the "Software"),
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions.
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+ *
+ * In addition, the following restrictions apply:
+ *
+ * 1. The Software and any modifications made to it may not be used for the purpose of training or improving machine learning algorithms,
+ * including but not limited to artificial intelligence, natural language processing, or data mining. This condition applies to any derivatives,
+ * modifications, or updates based on the Software code. Any usage of the Software in an AI-training dataset is considered a breach of this License.
+ *
+ * 2. The Software may not be included in any dataset used for training or improving machine learning algorithms,
+ * including but not limited to artificial intelligence, natural language processing, or data mining.
+ *
+ * 3. Any person or organization found to be in violation of these restrictions will be subject to legal action and may be held liable
+ * for any damages resulting from such use.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
+ * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
+ * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ *
+ */
+
 package jwt
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -25,47 +56,54 @@ type service struct {
 }
 
 func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
-	token, err := jwt.ParseWithClaims(accessToken,
-		&tokenClaim{},
-		func(token *jwt.Token) (interface{}, error) {
-			_, ok := token.Method.(*jwt.SigningMethodHMAC)
-			if !ok {
-				return nil, fmt.Errorf("%s, %w", "unsupported sign method", ErrWrongTokenSigningMethod)
-			}
+	token, err := jwt.ParseWithClaims(accessToken, &tokenClaim{
+		e:         nil,
+		register:  jwt.RegisteredClaims{},
+		ValuesMap: nil,
+	}, func(token *jwt.Token) (interface{}, error) {
+		_, ok := token.Method.(*jwt.SigningMethodHMAC)
+		if !ok {
+			return nil, s.e.ErrorOnly(ErrWrongTokenSigningMethod)
+		}
 
-			return []byte(s.secret), nil
-		},
+		return []byte(s.secret), nil
+	},
 	)
 	if err != nil {
-		return nil, ErrInvalidToken
+		return nil, s.e.ErrorOnly(err)
 	}
 
 	if !token.Valid {
-		return nil, ErrInvalidToken
+		return nil, s.e.ErrorOnly(ErrInvalidToken)
 	}
 
 	claim, ok := token.Claims.(*tokenClaim)
 	if !ok {
-		return nil, ErrInvalidTokenClaims
+		return nil, s.e.ErrorOnly(ErrInvalidTokenClaims)
 	}
 
 	return claim.GetAllData(), nil
 }
 
 func (s *service) GenerateJWT(expiredAt time.Time, values map[string]string) (string, error) {
-	claimBuilder := newTokenClaimBuilder(expiredAt)
+	claimBuilder := newTokenClaimBuilder(s.e, expiredAt)
 	claimBuilder.SetValues(values)
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimBuilder)
 
-	return token.SignedString([]byte(s.secret))
+	signed, err := token.SignedString([]byte(s.secret))
+	if err != nil {
+		return "", s.e.ErrorOnly(err)
+	}
+
+	return signed, nil
 }
 
 func NewJWTService(errFmtSvc errorFormatterService,
 	secret string,
-) (s *service) {
-	s = &service{
+) *service {
+	return &service{
+		e:      errFmtSvc,
 		secret: secret,
 	}
-	return
 }

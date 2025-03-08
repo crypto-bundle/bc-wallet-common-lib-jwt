@@ -1,6 +1,4 @@
 /*
- *
- *
  * MIT NON-AI License
  *
  * Copyright (c) 2022-2025 Aleksei Kotelnikov(gudron2s@gmail.com)
@@ -30,8 +28,11 @@
  *
  */
 
-package jwt
+package mockerrors
 
+import "errors"
+
+//nolint:interfacebloat // it's ok here, we need it we must use it as one big interface
 type errorFormatterService interface {
 	ErrWithCode(err error, code int) error
 	NewErrorWithCode(text string, code int) error
@@ -48,4 +49,71 @@ type errorFormatterService interface {
 	Errorf(err error, format string, args ...interface{}) error
 	NewError(details ...string) error
 	NewErrorf(format string, args ...interface{}) error
+}
+
+var _ errorFormatterService = (*errFmt)(nil)
+
+var ErrMockFormatter = errors.New("mock_err_formatter")
+
+type errFmt struct {
+}
+
+func (f *errFmt) NewErrorWithCode(text string, code int) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrorCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
+}
+
+func (f *errFmt) ErrCodeIsOneOf(err error, codes ...int) (int, bool) {
+	return -1, false
+}
+
+func (f *errFmt) ErrorWithCode(_ error, _ int) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrWithCode(_ error, _ int) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrorGetCode(_ error) int {
+	return -1
+}
+
+func (f *errFmt) ErrGetCode(_ error) int {
+	return -1
+}
+
+func (f *errFmt) ErrorNoWrap(_ error) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrNoWrap(_ error) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) ErrorOnly(_ error, _ ...string) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) Error(_ error, _ ...string) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) Errorf(_ error, _ string, _ ...interface{}) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) NewError(_ ...string) error {
+	return ErrMockFormatter
+}
+
+func (f *errFmt) NewErrorf(_ string, _ ...interface{}) error {
+	return ErrMockFormatter
+}
+
+func NewMockErrFormatter() *errFmt {
+	return &errFmt{}
 }

@@ -137,6 +137,7 @@ linters-settings:
       - ctx
     ignore-decls:
       - i int
+      - j int
 
 issues:
   exclude-rules:
