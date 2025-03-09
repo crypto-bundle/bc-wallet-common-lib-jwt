@@ -1,8 +1,22 @@
 # Change Log
 
-## [initial - v0.0.1] - 01.05.2023
-### Info
-* lib-jwt move to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-jwt
+## [v0.0.5] - 09.03.2025
+### Changed
+* Added support last version of
+  * [lib-tinyerrors](https://github.com/crypto-bundle/bc-wallet-common-lib-tinyerrors)
+  * [lib-errors](https://github.com/crypto-bundle/bc-wallet-common-lib-errors)
+* Added support of Go 1.23
+* Added linter and fixed up all linter issues
+* Updated License
+  * Copyright - new year 2025
+  * MIT -> MIT NON-AI
+  * Added License banner to *.go files
+
+## [v0.0.4] - 18.05.2024
+### Changed
+* Claim builder now internal part of jwt package
+* Changd GenerateJWT method of jwt-service:
+  * New signature - `GenerateJWT(expiredAt time.Time, values map[string]string) (string, error)`
 
 ## [v0.0.2, v0.0.3] - 13.05.2024
 ### Changed
@@ -13,8 +27,6 @@
   * Added GenerateJWT receiver method
   * Added GetTokenData receiver method
 
-## [v0.0.4] - 18.05.2024
-### Changed
-* Claim builder now internal part of jwt package
-* Changd GenerateJWT method of jwt-service:
-  * New signature - `GenerateJWT(expiredAt time.Time, values map[string]string) (string, error)`
+## [initial - v0.0.1] - 01.05.2023
+### Info
+* lib-jwt move to another repository - https://github.com/crypto-bundle/bc-wallet-common-lib-jwt

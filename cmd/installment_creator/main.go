@@ -1,8 +1,10 @@
 package main
 
 import (
+	"crypto/sha256"
 	"errors"
 	"flag"
+	"fmt"
 	"log"
 	"time"
 
@@ -17,8 +19,8 @@ var (
 )
 
 const (
-	merchantUUIDLabel = "merchant_uuid"
-	expiredAtLabel    = "expired_at"
+	installmentUUIDLabel = "installment_uuid"
+	expiredAtLabel       = "expired_at"
 )
 
 func main() {
@@ -27,7 +29,7 @@ func main() {
 	)
 
 	flag.StringVar(&key, "key", "", "secret key")
-	flag.StringVar(&uuid, "uuid", "", "merchant uuid")
+	flag.StringVar(&uuid, "uuid", "", "installment uuid")
 	flag.StringVar(&expiration, "expiration", "", "expiration date with format: '2006-01-02'")
 	flag.Parse()
 
@@ -49,8 +51,8 @@ func main() {
 	jwtSvc := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
 
 	token, err := jwtSvc.GenerateJWT(mExpTime, map[string]string{
-		merchantUUIDLabel: uuid,
-		expiredAtLabel:    mExpTime.Format(time.DateTime),
+		installmentUUIDLabel: uuid,
+		expiredAtLabel:       mExpTime.Format(time.DateTime),
 	})
 	if err != nil {
 		log.Fatalf("cant make JWT token. Error: %v ", err.Error())
@@ -63,5 +65,6 @@ func main() {
 		log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
 	}
 
-	log.Println("Origin data from token: ", data[merchantUUIDLabel], data[expiredAtLabel])
+	log.Println("Origin data from token: ", data[installmentUUIDLabel], data[expiredAtLabel])
+	log.Println("Token hash: ", fmt.Sprintf("%x", sha256.Sum256([]byte(token))))
 }

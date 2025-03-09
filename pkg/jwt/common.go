@@ -32,68 +32,20 @@
 
 package jwt
 
-import (
-	"errors"
-	"time"
-
-	"github.com/golang-jwt/jwt/v4"
-)
-
-//go:generate easyjson types.go
-
-var (
-	ErrDataPartAlreadyExists = errors.New("data already exist in claim")
-)
-
-// tokenClaim for store data map of uuid's
-// easyjson:json
-type tokenClaim struct {
-	ValuesMap map[string]string `json:"values_map,omitempty"`
-
-	e        errorFormatterService `json:"-"`
-	register jwt.RegisteredClaims  `json:"-"`
-}
-
-func (c *tokenClaim) Valid() error {
-	err := c.register.Valid()
-	if err != nil {
-		return c.e.ErrorOnly(err)
-	}
-
-	return nil
-}
-
-func (c *tokenClaim) GetAllData() map[string]string {
-	return c.ValuesMap
-}
-
-func (c *tokenClaim) AddValue(dataLabel string, dataValue string) error {
-	_, isExists := c.ValuesMap[dataLabel]
-	if isExists {
-		return ErrDataPartAlreadyExists
-	}
-
-	c.ValuesMap[dataLabel] = dataValue
-
-	return nil
-}
-
-func (c *tokenClaim) SetValues(values map[string]string) {
-	c.ValuesMap = values
-}
-
-func newTokenClaimBuilder(errFmtSvc errorFormatterService, expiredAt time.Time) *tokenClaim {
-	return &tokenClaim{
-		e: errFmtSvc,
-		register: jwt.RegisteredClaims{
-			Issuer:    "",
-			Subject:   "",
-			Audience:  nil,
-			ExpiresAt: jwt.NewNumericDate(expiredAt),
-			NotBefore: nil,
-			IssuedAt:  nil,
-			ID:        "",
-		},
-		ValuesMap: make(map[string]string, 1),
-	}
+type errorFormatterService interface {
+	ErrWithCode(err error, code int) error
+	NewErrorWithCode(text string, code int) error
+	ErrorGetCode(err error) int
+	ErrGetCode(err error) int
+	ErrorCodeIsOneOf(err error, codes ...int) (int, bool)
+	ErrCodeIsOneOf(err error, codes ...int) (int, bool)
+	// ErrorNoWrap function for pseudo-wrap error, must be used in case of linter warnings...
+	ErrorNoWrap(err error) error
+	// ErrNoWrap same with ErrorNoWrap function, just alias for ErrorNoWrap, just short function name...
+	ErrNoWrap(err error) error
+	ErrorOnly(err error, details ...string) error
+	Error(err error, details ...string) error
+	Errorf(err error, format string, args ...interface{}) error
+	NewError(details ...string) error
+	NewErrorf(format string, args ...interface{}) error
 }
