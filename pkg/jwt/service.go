@@ -57,8 +57,16 @@ type service struct {
 
 func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaim{
-		e:         nil,
-		register:  jwt.RegisteredClaims{},
+		e: nil,
+		register: jwt.RegisteredClaims{
+			Issuer:    "",
+			Subject:   "",
+			Audience:  nil,
+			ExpiresAt: nil,
+			NotBefore: nil,
+			IssuedAt:  nil,
+			ID:        "",
+		},
 		ValuesMap: nil,
 	}, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
@@ -67,8 +75,7 @@ func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
 		}
 
 		return []byte(s.secret), nil
-	},
-	)
+	})
 	if err != nil {
 		return nil, s.e.ErrorOnly(err)
 	}

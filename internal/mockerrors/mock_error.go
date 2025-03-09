@@ -55,6 +55,9 @@ var _ errorFormatterService = (*errFmt)(nil)
 
 var ErrMockFormatter = errors.New("mock_err_formatter")
 
+// ATTENTION: DO NOT USE THIS ERROR FORMATTER IN PRODUCTION CODE. These are build-time constants
+//
+// errFmt - internal implementation of standard crypto-bundle error formatter service
 type errFmt struct {
 }
 

@@ -139,6 +139,16 @@ linters-settings:
       - i int
       - j int
 
+  tagliatelle:
+    case:
+      rules:
+        json: snake
+        yaml: snake
+        xml: snake
+        toml: snake
+        env: upperSnake
+        envconfig: upperSnake
+
 issues:
   exclude-rules:
     - linters:

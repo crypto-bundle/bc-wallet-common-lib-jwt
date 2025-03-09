@@ -48,10 +48,10 @@ var (
 // tokenClaim for store data map of uuid's
 // easyjson:json
 type tokenClaim struct {
+	ValuesMap map[string]string `json:"values_map,omitempty"`
+
 	e        errorFormatterService `json:"-"`
 	register jwt.RegisteredClaims  `json:"-"`
-
-	ValuesMap map[string]string `json:"values_map,omitempty"`
 }
 
 func (c *tokenClaim) Valid() error {

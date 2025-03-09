@@ -7,7 +7,6 @@ import (
 	"time"
 
 	"github.com/crypto-bundle/bc-wallet-common-lib-jwt/internal/mockerrors"
-
 	jwttool "github.com/crypto-bundle/bc-wallet-common-lib-jwt/pkg/jwt"
 
 	_ "github.com/mailru/easyjson/gen"
