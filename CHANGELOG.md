@@ -1,5 +1,10 @@
 # Change Log
 
+## [v0.0.6] - 27.04.2025
+### Fix
+* Bump golang-jwt/jwt/v4 version to - v4.5.2
+  * Fixed dependency on jwt-go library version which allows excessive memory allocation during header parsing
+
 ## [v0.0.5] - 09.03.2025
 ### Changed
 * Added support last version of
