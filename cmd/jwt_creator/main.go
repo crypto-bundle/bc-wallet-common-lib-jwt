@@ -48,20 +48,32 @@ func main() {
 
 	jwtSvc := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
 
-	token, err := jwtSvc.GenerateJWT(mExpTime, map[string]string{
-		merchantUUIDLabel: uuid,
-		expiredAtLabel:    mExpTime.Format(time.DateTime),
-	})
+	tokenStr, err := jwtSvc.GenerateJWT(mExpTime,
+		jwttool.String(merchantUUIDLabel, uuid),
+		jwttool.Time(expiredAtLabel, mExpTime),
+	)
 	if err != nil {
 		log.Fatalf("cant make JWT token. Error: %v ", err.Error())
 	}
 
-	log.Println("Token: ", token)
+	log.Println("Token: ", tokenStr)
 
-	data, err := jwtSvc.GetTokenData(token)
+	data, err := jwtSvc.GetTokenData(tokenStr)
 	if err != nil {
 		log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
 	}
 
-	log.Println("Origin data from token: ", data[merchantUUIDLabel], data[expiredAtLabel])
+	var expiredAt time.Time
+	err = data.ScanByKey(expiredAtLabel, &expiredAt)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var merchantUUID string
+	err = data.ScanByKey(merchantUUIDLabel, &merchantUUID)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	log.Println("Origin data from token: ", expiredAt, merchantUUID)
 }

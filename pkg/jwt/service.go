@@ -55,7 +55,7 @@ type service struct {
 	secret string
 }
 
-func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
+func (s *service) GetTokenData(accessToken string) (TokenClaimValues, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaim{
 		e: nil,
 		register: jwt.RegisteredClaims{
@@ -92,15 +92,18 @@ func (s *service) GetTokenData(accessToken string) (map[string]string, error) {
 	return claim.GetAllData(), nil
 }
 
-func (s *service) GenerateJWT(expiredAt time.Time, values map[string]string) (string, error) {
+func (s *service) GenerateJWT(expiredAt time.Time, values ...Field) (string, error) {
 	claimBuilder := newTokenClaimBuilder(s.e, expiredAt)
-	claimBuilder.SetValues(values)
+	err := claimBuilder.AddValues(values...)
+	if err != nil {
+		return "", s.e.Error(err, "unable to add values to token claim")
+	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimBuilder)
 
 	signed, err := token.SignedString([]byte(s.secret))
 	if err != nil {
-		return "", s.e.ErrorOnly(err)
+		return "", s.e.ErrorOnly(err, "unable to get signed string")
 	}
 
 	return signed, nil

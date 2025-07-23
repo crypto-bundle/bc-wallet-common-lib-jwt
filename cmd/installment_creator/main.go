@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/crypto-bundle/bc-wallet-common-lib-jwt/internal/mockerrors"
@@ -20,17 +21,21 @@ var (
 
 const (
 	installmentUUIDLabel = "installment_uuid"
+	tokenUUIDLabel       = "token_uuid"
 	expiredAtLabel       = "expired_at"
+	domainsLabel         = "domains"
 )
 
 func main() {
 	var (
-		key, uuid, expiration string
+		key, uuid, tokenUUID, expiration, domains string
 	)
 
 	flag.StringVar(&key, "key", "", "secret key")
 	flag.StringVar(&uuid, "uuid", "", "installment uuid")
+	flag.StringVar(&tokenUUID, "token_uuid", "", "token uuid")
 	flag.StringVar(&expiration, "expiration", "", "expiration date with format: '2006-01-02'")
+	flag.StringVar(&domains, "domains", "", "domains list separated by comma - domain.com,sub.domain.com")
 	flag.Parse()
 
 	if key == "" {
@@ -50,10 +55,14 @@ func main() {
 
 	jwtSvc := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
 
-	token, err := jwtSvc.GenerateJWT(mExpTime, map[string]string{
-		installmentUUIDLabel: uuid,
-		expiredAtLabel:       mExpTime.Format(time.DateTime),
-	})
+	domainsList := strings.Split(domains, ",")
+
+	token, err := jwtSvc.GenerateJWT(mExpTime,
+		jwttool.String(installmentUUIDLabel, uuid),
+		jwttool.String(tokenUUIDLabel, tokenUUID),
+		jwttool.Time(expiredAtLabel, mExpTime),
+		jwttool.Strings(domainsLabel, domainsList),
+	)
 	if err != nil {
 		log.Fatalf("cant make JWT token. Error: %v ", err.Error())
 	}
@@ -65,6 +74,24 @@ func main() {
 		log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
 	}
 
-	log.Println("Origin data from token: ", data[installmentUUIDLabel], data[expiredAtLabel])
+	var expitedAt time.Time
+	err = data.ScanByKey(expiredAtLabel, &expitedAt)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var instUUID string
+	err = data.ScanByKey(installmentUUIDLabel, &instUUID)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var domainsResultList []string = nil
+	err = data.ScanByKey(domainsLabel, &domainsResultList)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	log.Println("Origin data from token: ", instUUID, expitedAt, domainsResultList)
 	log.Println("Token hash: ", fmt.Sprintf("%x", sha256.Sum256([]byte(token))))
 }

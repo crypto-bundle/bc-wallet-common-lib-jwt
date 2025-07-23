@@ -37,21 +37,7 @@ func easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(in *j
 		}
 		switch key {
 		case "values_map":
-			if in.IsNull() {
-				in.Skip()
-			} else {
-				in.Delim('{')
-				out.ValuesMap = make(map[string]string)
-				for !in.IsDelim('}') {
-					key := string(in.String())
-					in.WantColon()
-					var v1 string
-					v1 = string(in.String())
-					(out.ValuesMap)[key] = v1
-					in.WantComma()
-				}
-				in.Delim('}')
-			}
+			(out.ValuesMap).UnmarshalEasyJSON(in)
 		default:
 			in.SkipRecursive()
 		}
@@ -66,26 +52,11 @@ func easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(out *
 	out.RawByte('{')
 	first := true
 	_ = first
-	{
+	if len(in.ValuesMap) != 0 {
 		const prefix string = ",\"values_map\":"
+		first = false
 		out.RawString(prefix[1:])
-		if in.ValuesMap == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
-			out.RawString(`null`)
-		} else {
-			out.RawByte('{')
-			v2First := true
-			for v2Name, v2Value := range in.ValuesMap {
-				if v2First {
-					v2First = false
-				} else {
-					out.RawByte(',')
-				}
-				out.String(string(v2Name))
-				out.RawByte(':')
-				out.String(string(v2Value))
-			}
-			out.RawByte('}')
-		}
+		(in.ValuesMap).MarshalEasyJSON(out)
 	}
 	out.RawByte('}')
 }
@@ -112,4 +83,68 @@ func (v *tokenClaim) UnmarshalJSON(data []byte) error {
 // UnmarshalEasyJSON supports easyjson.Unmarshaler interface
 func (v *tokenClaim) UnmarshalEasyJSON(l *jlexer.Lexer) {
 	easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt(l, v)
+}
+func easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(in *jlexer.Lexer, out *TokenClaimValues) {
+	isTopLevel := in.IsStart()
+	if in.IsNull() {
+		in.Skip()
+	} else {
+		in.Delim('{')
+		*out = make(TokenClaimValues)
+		for !in.IsDelim('}') {
+			key := string(in.String())
+			in.WantColon()
+			var v1 Field
+			(v1).UnmarshalEasyJSON(in)
+			(*out)[key] = v1
+			in.WantComma()
+		}
+		in.Delim('}')
+	}
+	if isTopLevel {
+		in.Consumed()
+	}
+}
+func easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(out *jwriter.Writer, in TokenClaimValues) {
+	if in == nil && (out.Flags&jwriter.NilMapAsEmpty) == 0 {
+		out.RawString(`null`)
+	} else {
+		out.RawByte('{')
+		v2First := true
+		for v2Name, v2Value := range in {
+			if v2First {
+				v2First = false
+			} else {
+				out.RawByte(',')
+			}
+			out.String(string(v2Name))
+			out.RawByte(':')
+			(v2Value).MarshalEasyJSON(out)
+		}
+		out.RawByte('}')
+	}
+}
+
+// MarshalJSON supports json.Marshaler interface
+func (v TokenClaimValues) MarshalJSON() ([]byte, error) {
+	w := jwriter.Writer{}
+	easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(&w, v)
+	return w.Buffer.BuildBytes(), w.Error
+}
+
+// MarshalEasyJSON supports easyjson.Marshaler interface
+func (v TokenClaimValues) MarshalEasyJSON(w *jwriter.Writer) {
+	easyjson6601e8cdEncodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(w, v)
+}
+
+// UnmarshalJSON supports json.Unmarshaler interface
+func (v *TokenClaimValues) UnmarshalJSON(data []byte) error {
+	r := jlexer.Lexer{Data: data}
+	easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(&r, v)
+	return r.Error()
+}
+
+// UnmarshalEasyJSON supports easyjson.Unmarshaler interface
+func (v *TokenClaimValues) UnmarshalEasyJSON(l *jlexer.Lexer) {
+	easyjson6601e8cdDecodeGithubComCryptoBundleBcWalletCommonLibJwtPkgJwt1(l, v)
 }

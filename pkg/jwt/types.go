@@ -42,13 +42,60 @@ import (
 //go:generate easyjson types.go
 
 var (
-	ErrDataPartAlreadyExists = errors.New("data already exist in claim")
+	ErrDataPartAlreadyExists           = errors.New("data already exist in claim")
+	ErrUnableToScanDataMismatchType    = errors.New("unable to scan data - type mismatched")
+	ErrUnableToScanDataRequiredPointer = errors.New("unable to scan data - pointer required")
+	ErrMissingDataByKey                = errors.New("key not found - missing data")
 )
+
+// easyjson:json
+type TokenClaimValues map[string]Field
+
+func (c TokenClaimValues) GetDataByKey(key string) (Field, bool) {
+	field, ok := c[key]
+
+	return field, ok
+}
+
+func (c TokenClaimValues) ScanByKey(key string, target any) error {
+	field, ok := c[key]
+	if !ok {
+		return ErrMissingDataByKey
+	}
+
+	return field.Scan(target)
+}
+
+func (c TokenClaimValues) AddValue(dataValue Field) error {
+	return c.addValue(dataValue)
+}
+
+func (c TokenClaimValues) addValue(dataValue Field) error {
+	_, isExists := c[dataValue.Key]
+	if isExists {
+		return ErrDataPartAlreadyExists
+	}
+
+	c[dataValue.Key] = dataValue
+
+	return nil
+}
+
+func (c TokenClaimValues) AddValues(dataValue ...Field) error {
+	for i, _ := range dataValue {
+		loopErr := c.addValue(dataValue[i])
+		if loopErr != nil {
+			return loopErr
+		}
+	}
+
+	return nil
+}
 
 // tokenClaim for store data map of uuid's
 // easyjson:json
 type tokenClaim struct {
-	ValuesMap map[string]string `json:"values_map,omitempty"`
+	ValuesMap TokenClaimValues `json:"values_map,omitempty"`
 
 	e        errorFormatterService `json:"-"`
 	register jwt.RegisteredClaims  `json:"-"`
@@ -63,22 +110,19 @@ func (c *tokenClaim) Valid() error {
 	return nil
 }
 
-func (c *tokenClaim) GetAllData() map[string]string {
+func (c *tokenClaim) GetAllData() TokenClaimValues {
 	return c.ValuesMap
 }
 
-func (c *tokenClaim) AddValue(dataLabel string, dataValue string) error {
-	_, isExists := c.ValuesMap[dataLabel]
-	if isExists {
-		return ErrDataPartAlreadyExists
-	}
-
-	c.ValuesMap[dataLabel] = dataValue
-
-	return nil
+func (c *tokenClaim) AddValue(dataValue Field) error {
+	return c.ValuesMap.AddValue(dataValue)
 }
 
-func (c *tokenClaim) SetValues(values map[string]string) {
+func (c *tokenClaim) AddValues(dataValue ...Field) error {
+	return c.ValuesMap.AddValues(dataValue...)
+}
+
+func (c *tokenClaim) SetValues(values TokenClaimValues) {
 	c.ValuesMap = values
 }
 
@@ -94,6 +138,6 @@ func newTokenClaimBuilder(errFmtSvc errorFormatterService, expiredAt time.Time) 
 			IssuedAt:  nil,
 			ID:        "",
 		},
-		ValuesMap: make(map[string]string, 1),
+		ValuesMap: make(TokenClaimValues, 1),
 	}
 }
