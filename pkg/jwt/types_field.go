@@ -1,34 +1,33 @@
-/*
- *
- *
- * MIT NON-AI License
- *
- * Copyright (c) 2022-2025 Aleksei Kotelnikov(gudron2s@gmail.com)
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy of the software and associated documentation files (the "Software"),
- * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense,
- * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions.
- *
- * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
- *
- * In addition, the following restrictions apply:
- *
- * 1. The Software and any modifications made to it may not be used for the purpose of training or improving machine learning algorithms,
- * including but not limited to artificial intelligence, natural language processing, or data mining. This condition applies to any derivatives,
- * modifications, or updates based on the Software code. Any usage of the Software in an AI-training dataset is considered a breach of this License.
- *
- * 2. The Software may not be included in any dataset used for training or improving machine learning algorithms,
- * including but not limited to artificial intelligence, natural language processing, or data mining.
- *
- * 3. Any person or organization found to be in violation of these restrictions will be subject to legal action and may be held liable
- * for any damages resulting from such use.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
- * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE
- * OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- */
+// MIT NON-AI License
+//
+// Copyright (c) 2022-2025 Aleksei Kotelnikov(gudron2s@gmail.com)
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy of the software and associated
+// documentation files (the "Software"),to deal in the Software without restriction, including without limitation
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software,
+// and to permit persons to whom the Software is furnished to do so, subject to the following conditions.
+//
+// The above copyright notice and this permission notice shall be included in all copies or substantial
+// portions of the Software.
+//
+// In addition, the following restrictions apply:
+//
+// 1. The Software and any modifications made to it may not be used for the purpose of training or improving machine
+// learning algorithms, including but not limited to artificial intelligence, natural language processing,
+// or data mining.This condition applies to any derivatives, modifications, or updates based on the
+// Software code. Any usage of the Software in an AI-training dataset is considered a breach of this License.
+//
+// 2. The Software may not be included in any dataset used for training or improving machine learning algorithms,
+// including but not limited to artificial intelligence, natural language processing, or data mining.
+//
+// 3. Any person or organization found to be in violation of these restrictions will be subject to legal action and
+// may be held liable for any damages resulting from such use.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+// DEALINGS IN THE SOFTWARE.
 
 package jwt
 
@@ -97,11 +96,11 @@ const (
 // to disabled debug-level log statements.
 // easyjson:json
 type Field struct {
-	Key       string      `json:"key"`
-	Type      FieldType   `json:"type"`
-	Integer   int64       `json:"integer"`
-	String    string      `json:"string"`
 	Interface interface{} `json:"interface,omitempty"`
+	Key       string      `json:"key"`
+	String    string      `json:"string"`
+	Integer   int64       `json:"integer"`
+	Type      FieldType   `json:"type"`
 }
 
 func (f *Field) Scan(target any) error {
@@ -120,7 +119,7 @@ func (f *Field) Scan(target any) error {
 // easyjson:json
 type stringArray []string
 
-// ScanString scan field to string pointer
+// ScanString scan field to string pointer.
 func ScanString(f *Field, target any) error {
 	switch t := target.(type) {
 	case *string:
@@ -134,16 +133,16 @@ func ScanString(f *Field, target any) error {
 	}
 }
 
-// ScanStrings scan field to string pointer
+// ScanStrings scan field to string pointer.
 func ScanStrings(f *Field, target any) error {
 	values, isCasted := f.Interface.([]interface{})
 	if !isCasted {
 		return ErrUnableToScanDataMismatchType
 	}
 
-	result := make([]string, len(values), len(values))
+	result := make([]string, len(values))
 
-	for i, _ := range values {
+	for i := range values {
 		value := values[i]
 
 		strValue, isOk := value.(string)
@@ -166,10 +165,9 @@ func ScanStrings(f *Field, target any) error {
 	}
 }
 
-// ScanTime scan field to string or string pointer
+// ScanTime scan field to string or string pointer.
 func ScanTime(f *Field, target any) error {
-	var value time.Time
-	value = time.Unix(0, f.Integer)
+	var value = time.Unix(0, f.Integer)
 
 	switch t := target.(type) {
 	case *time.Time:
@@ -183,6 +181,7 @@ func ScanTime(f *Field, target any) error {
 	}
 }
 
+//nolint:gochecknoglobals
 var (
 	_minTimeInt64 = time.Unix(0, math.MinInt64)
 	_maxTimeInt64 = time.Unix(0, math.MaxInt64)
@@ -209,6 +208,7 @@ func Bool(key string, val bool) Field {
 	if val {
 		ival = 1
 	}
+
 	return Field{Key: key, Type: BoolType, Integer: ival}
 }
 
@@ -236,6 +236,8 @@ func Complex64(key string, val complex64) Field {
 // Float64 constructs a field that carries a float64. The way the
 // floating-point value is represented is encoder-dependent, so marshaling is
 // necessarily lazy.
+//
+//nolint:gosec //todo: migrate to big.Int
 func Float64(key string, val float64) Field {
 	return Field{Key: key, Type: Float64Type, Integer: int64(math.Float64bits(val))}
 }
@@ -288,6 +290,8 @@ func Uint(key string, val uint) Field {
 }
 
 // Uint64 constructs a field with the given key and value.
+//
+//nolint:gosec //todo: migrate to big.Int
 func Uint64(key string, val uint64) Field {
 	return Field{Key: key, Type: Uint64Type, Integer: int64(val)}
 }
@@ -313,6 +317,7 @@ func Time(key string, val time.Time) Field {
 	if val.Before(_minTimeInt64) || val.After(_maxTimeInt64) {
 		return Field{Key: key, Type: TimeFullType, Interface: val}
 	}
+
 	return Field{Key: key, Type: TimeType, Integer: val.UnixNano(), Interface: val.Location()}
 }
 

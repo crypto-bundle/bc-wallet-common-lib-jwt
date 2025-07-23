@@ -34,7 +34,7 @@ func main() {
     // set expiration time
     mExpTime := time.Now().Add(jwttool.LongLiveTokenDuration)
 
-    jwtSrv := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
+    jwtSrv := jwttool.NewJWTManger(mockerrors.NewMockErrFormatter(), key)
 
     token, err := jwtSvc.GenerateJWT(mExpTime,
 		    jwttool.String(DataInfoLabel, DataInfoUUID),
@@ -44,7 +44,7 @@ func main() {
         log.Fatalf("unable to  make JWT token. Error: %v ", err.Error())
     }
 
-    data, err := jwtSvc.GetTokenData(token)
+    data, err := jwtSvc.GetTokenClaimsData(token)
     if err != nil {
         log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
     }

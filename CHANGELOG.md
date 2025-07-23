@@ -1,18 +1,23 @@
 # Change Log
 
-## [v0.0.7] - 23.07.2025
+## [v0.0.7, v0.0.8] - 23.07.2025
 ### Added
 * Extended token claim data - added "Fields" management
-* Changed `GenerateJWT` method of JWT-service:
-  * New signature - `GenerateJWT(expiredAt time.Time, values ...Field) (string, error)`
-* Added `ScanByKey` method to JWT-service
-  * New signature of `GetTokenData` function - `GetTokenData(accessToken string) (TokenClaimValues, error)`
+* Changed JWT-manger service-component:
+  * Changed `GenerateJWT` - new signature - `GenerateJWT(expiredAt time.Time, values ...Field) (string, error)`
+  * Renamed `GetTokenData` to `GetTokenClaimsData` function
+    * Changed function signature `GetTokenClaimsData(accessToken string) (TokenClaimValues, error)`
+  * Added `ValidateToken` method
+  * Added `DecodeToken` method - `DecodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error)`
+* Added new receiver-function `ScanByKey` method to JWT-token claim struct
   * Add new receiver-function to `TokenClaimValues` struct - `ScanByKey(key string, target any) error`
 ### Changed
 * Updated README.md - changed example of usage
 * Updated example apps:
   * InstallmentCreate - [installment_creator/main.go](./cmd/installment_creator/main.go)
   * JwtCreator - [jwt_creator/main.go](./cmd/jwt_creator/main.go)
+* Fixed linter issues
+* Moved copyright management to golangci-lint - `goheader` linter
 
 ## [v0.0.6] - 27.04.2025
 ### Fix
