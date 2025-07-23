@@ -1,6 +1,7 @@
 default: lint
 
-lint:
-	golangci-lint run --config .golangci.yml -v ./...
+lint: ## run linter
+	@echo "Running golangci-lint with auto-fix..."
+	golangci-lint run --fix --config .golangci.yml
 
 .PHONY: lint

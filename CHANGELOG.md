@@ -16,6 +16,8 @@
 * Updated example apps:
   * InstallmentCreate - [installment_creator/main.go](./cmd/installment_creator/main.go)
   * JwtCreator - [jwt_creator/main.go](./cmd/jwt_creator/main.go)
+* Fixed linter issues
+* Moved copyright management to golangci-lint - `goheader` linter
 
 ## [v0.0.6] - 27.04.2025
 ### Fix
