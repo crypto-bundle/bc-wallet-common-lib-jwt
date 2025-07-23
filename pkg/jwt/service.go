@@ -49,13 +49,35 @@ var (
 	ErrInvalidTokenClaims      = errors.New("invalid token claims")
 )
 
-type service struct {
+type TokenManager struct {
 	e errorFormatterService
 
 	secret string
 }
 
-func (s *service) GetTokenData(accessToken string) (TokenClaimValues, error) {
+func (s *TokenManager) GetTokenClaimsData(accessToken string) (TokenClaimValues, error) {
+	_, claimData, err := s.decodeToken(accessToken)
+	if err != nil {
+		return nil, err
+	}
+
+	return claimData, nil
+}
+
+func (s *TokenManager) ValidateToken(accessToken string) (bool, error) {
+	token, _, err := s.decodeToken(accessToken)
+	if err != nil {
+		return false, err
+	}
+
+	return token.Valid, nil
+}
+
+func (s *TokenManager) DecodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
+	return s.decodeToken(accessToken)
+}
+
+func (s *TokenManager) decodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
 	token, err := jwt.ParseWithClaims(accessToken, &tokenClaim{
 		e: nil,
 		register: jwt.RegisteredClaims{
@@ -77,22 +99,18 @@ func (s *service) GetTokenData(accessToken string) (TokenClaimValues, error) {
 		return []byte(s.secret), nil
 	})
 	if err != nil {
-		return nil, s.e.ErrorOnly(err)
-	}
-
-	if !token.Valid {
-		return nil, s.e.ErrorOnly(ErrInvalidToken)
+		return nil, nil, s.e.ErrorOnly(err)
 	}
 
 	claim, ok := token.Claims.(*tokenClaim)
 	if !ok {
-		return nil, s.e.ErrorOnly(ErrInvalidTokenClaims)
+		return nil, nil, s.e.ErrorOnly(ErrInvalidTokenClaims)
 	}
 
-	return claim.GetAllData(), nil
+	return token, claim.GetAllData(), nil
 }
 
-func (s *service) GenerateJWT(expiredAt time.Time, values ...Field) (string, error) {
+func (s *TokenManager) GenerateJWT(expiredAt time.Time, values ...Field) (string, error) {
 	claimBuilder := newTokenClaimBuilder(s.e, expiredAt)
 	err := claimBuilder.AddValues(values...)
 	if err != nil {
@@ -109,10 +127,10 @@ func (s *service) GenerateJWT(expiredAt time.Time, values ...Field) (string, err
 	return signed, nil
 }
 
-func NewJWTService(errFmtSvc errorFormatterService,
+func NewJWTManger(errFmtSvc errorFormatterService,
 	secret string,
-) *service {
-	return &service{
+) *TokenManager {
+	return &TokenManager{
 		e:      errFmtSvc,
 		secret: secret,
 	}

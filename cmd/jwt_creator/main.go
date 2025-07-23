@@ -46,7 +46,7 @@ func main() {
 		mExpTime = expTime
 	}
 
-	jwtSvc := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
+	jwtSvc := jwttool.NewJWTManger(mockerrors.NewMockErrFormatter(), key)
 
 	tokenStr, err := jwtSvc.GenerateJWT(mExpTime,
 		jwttool.String(merchantUUIDLabel, uuid),
@@ -58,7 +58,7 @@ func main() {
 
 	log.Println("Token: ", tokenStr)
 
-	data, err := jwtSvc.GetTokenData(tokenStr)
+	data, err := jwtSvc.GetTokenClaimsData(tokenStr)
 	if err != nil {
 		log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
 	}
