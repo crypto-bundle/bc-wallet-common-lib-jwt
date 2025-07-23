@@ -25,32 +25,45 @@ import (
 
 const (
     DataInfoLabel = "data_label_uuid" 
-	DataInfoUUID = "930de0c3-fd5f-4fa4-bcaa-ced05a68eade"
+	  DataInfoUUID = "930de0c3-fd5f-4fa4-bcaa-ced05a68eade"
+	  ExpiredAtLabel = "expired_at"
 )
 
 
 func main() {
-
     // set expiration time
-    mExpTime := time.Now().Add(jwttool.LongLiveTokenDuration) 
-    
-	// create claim builder
-	claimBuilder := jwttool.NewTokenClaimBuilder(mExpTime)
-	
-	// Add data to claim - Label, and target data
-    err := claimBuilder.AddData(DataInfoLabel, DataInfoUUID)
-    if err != nil {
-        log.Fatalf("%s", err)
-    }
+    mExpTime := time.Now().Add(jwttool.LongLiveTokenDuration)
 
-    jwtSrv := jwttool.NewJWTService(key)
-    token, err := jwtSrv.GenerateJWT(claimBuilder)
+    jwtSrv := jwttool.NewJWTService(mockerrors.NewMockErrFormatter(), key)
+
+    token, err := jwtSvc.GenerateJWT(mExpTime,
+		    jwttool.String(DataInfoLabel, DataInfoUUID),
+        jwttool.Time(ExpiredAtLabel, mExpTime),
+		)
     if err != nil {
         log.Fatalf("unable to  make JWT token. Error: %v ", err.Error())
     }
+
+    data, err := jwtSvc.GetTokenData(token)
+    if err != nil {
+        log.Fatalf("unable to get data from JWT token. Error: %v ", err.Error())
+    }
+    
+    var expitedAt time.Time
+    err = data.ScanByKey(ExpiredAtLabel, &expitedAt)
+    if err != nil {
+        log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+    }
+
+    var dataInfoUUID string
+    err = data.ScanByKey(DataInfoLabel, &dataInfoUUID)
+    if err != nil {
+        log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+    }
 	
     log.Println("Token: ", token)
-	
+    log.Println("ExpiredAt: ", expitedAt)
+	  log.Println("DataInfoUUID: ", dataInfoUUID)
 }
 ```
 

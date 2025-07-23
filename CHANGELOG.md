@@ -1,5 +1,19 @@
 # Change Log
 
+## [v0.0.7] - 23.07.2025
+### Added
+* Extended token claim data - added "Fields" management
+* Changed `GenerateJWT` method of JWT-service:
+  * New signature - `GenerateJWT(expiredAt time.Time, values ...Field) (string, error)`
+* Added `ScanByKey` method to JWT-service
+  * New signature of `GetTokenData` function - `GetTokenData(accessToken string) (TokenClaimValues, error)`
+  * Add new receiver-function to `TokenClaimValues` struct - `ScanByKey(key string, target any) error`
+### Changed
+* Updated README.md - changed example of usage
+* Updated example apps:
+  * InstallmentCreate - [installment_creator/main.go](./cmd/installment_creator/main.go)
+  * JwtCreator - [jwt_creator/main.go](./cmd/jwt_creator/main.go)
+
 ## [v0.0.6] - 27.04.2025
 ### Fix
 * Bump golang-jwt/jwt/v4 version to - v4.5.2
