@@ -57,6 +57,49 @@ const (
 	domainsLabel         = "domains"
 )
 
+type installmentTokenInfo struct {
+	uuid, tokenUUID string
+	expiration      time.Time
+	domains         []string
+}
+
+func (s *installmentTokenInfo) ScanClaims(values jwttool.TokenClaimValues) error {
+	var expiredAt time.Time
+
+	err := values.ScanByKey(expiredAtLabel, &expiredAt)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var tokenUUID string
+
+	err = values.ScanByKey(tokenUUIDLabel, &tokenUUID)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var instUUID string
+
+	err = values.ScanByKey(installmentUUIDLabel, &instUUID)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	var domainsResultList []string = nil
+
+	err = values.ScanByKey(domainsLabel, &domainsResultList)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
+	}
+
+	s.domains = domainsResultList
+	s.tokenUUID = tokenUUID
+	s.uuid = instUUID
+	s.expiration = expiredAt
+
+	return nil
+}
+
 //nolint:funlen
 func main() {
 	var (
@@ -132,6 +175,19 @@ func main() {
 		log.Fatalf("unable to scan data from JWT token. Error: %v ", err.Error())
 	}
 
+	fullTokenInfo := installmentTokenInfo{}
+
+	err = data.ScanToStruct(&fullTokenInfo)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token to struct. Error: %v ", err.Error())
+	}
+
 	log.Println("Origin data from token: ", instUUID, expitedAt, domainsResultList)
+	log.Println(
+		"Scanned data from token: ",
+		fullTokenInfo.uuid,
+		fullTokenInfo.expiration,
+		fullTokenInfo.domains,
+	)
 	log.Println("Token hash: ", fmt.Sprintf("%x", sha256.Sum256([]byte(token))))
 }

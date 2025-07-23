@@ -1,6 +1,6 @@
 # Change Log
 
-## [v0.0.7, v0.0.8] - 23.07.2025
+## [v0.0.7, v0.0.8, v0.0.9] - 23.07.2025
 ### Added
 * Extended token claim data - added "Fields" management
 * Changed JWT-manger service-component:
@@ -9,6 +9,8 @@
     * Changed function signature `GetTokenClaimsData(accessToken string) (TokenClaimValues, error)`
   * Added `ValidateToken` method
   * Added `DecodeToken` method - `DecodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error)`
+  * Added `ScanToStruct` method -  `ScanToStruct(target ClaimScanner) error`
+    * Added requiring of interface implementation - `ClaimScanner` with single function
 * Added new receiver-function `ScanByKey` method to JWT-token claim struct
   * Add new receiver-function to `TokenClaimValues` struct - `ScanByKey(key string, target any) error`
 ### Changed

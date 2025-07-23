@@ -50,6 +50,11 @@ var (
 // easyjson:json
 type TokenClaimValues map[string]Field
 
+//nolint:wrapcheck
+func (c TokenClaimValues) ScanToStruct(target ClaimScanner) error {
+	return target.ScanClaims(c)
+}
+
 func (c TokenClaimValues) GetDataByKey(key string) (Field, bool) {
 	field, ok := c[key]
 

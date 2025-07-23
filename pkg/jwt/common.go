@@ -48,3 +48,7 @@ type errorFormatterService interface {
 	NewError(details ...string) error
 	NewErrorf(format string, args ...interface{}) error
 }
+
+type ClaimScanner interface {
+	ScanClaims(values TokenClaimValues) error
+}
