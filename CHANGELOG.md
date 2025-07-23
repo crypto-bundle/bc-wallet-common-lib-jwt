@@ -7,7 +7,7 @@
   * New signature - `GenerateJWT(expiredAt time.Time, values ...Field) (string, error)`
 * Added `ScanByKey` method to JWT-service
   * New signature of `GetTokenData` function - `GetTokenData(accessToken string) (TokenClaimValues, error)`
-  * Function of `TokenClaimValues` strunct - `ScanByKey(key string, target any) error`
+  * Add new receiver-function to `TokenClaimValues` struct - `ScanByKey(key string, target any) error`
 ### Changed
 * Updated README.md - changed example of usage
 * Updated example apps:
