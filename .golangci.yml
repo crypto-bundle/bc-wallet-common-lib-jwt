@@ -98,7 +98,7 @@ linters:
             - $gostd
             - github.com/crypto-bundle/
             - github.com/mailru/easyjson
-            - github.com/golang-jwt/jwt/v4
+            - github.com/golang-jwt/jwt/v5
 
     revive:
       rules:

@@ -32,29 +32,14 @@
 package jwt
 
 import (
-	"errors"
-	"time"
-
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
-const (
-	LongLiveTokenDuration = time.Hour * 8760 * 50 // 50 years
-)
-
-var (
-	ErrWrongTokenSigningMethod = errors.New("unexpected token signing method")
-	ErrInvalidToken            = errors.New("invalid token")
-	ErrInvalidTokenClaims      = errors.New("invalid token claims")
-)
-
-type TokenManager struct {
+type TokenDecoder struct {
 	e errorFormatterService
-
-	secret string
 }
 
-func (s *TokenManager) GetTokenClaimsData(accessToken string) (TokenClaimValues, error) {
+func (s *TokenDecoder) GetTokenClaimsData(accessToken string) (TokenClaimValues, error) {
 	_, claimData, err := s.decodeToken(accessToken)
 	if err != nil {
 		return nil, err
@@ -63,40 +48,23 @@ func (s *TokenManager) GetTokenClaimsData(accessToken string) (TokenClaimValues,
 	return claimData, nil
 }
 
-func (s *TokenManager) ValidateToken(accessToken string) (bool, error) {
-	token, _, err := s.decodeToken(accessToken)
-	if err != nil {
-		return false, err
-	}
-
-	return token.Valid, nil
-}
-
-func (s *TokenManager) DecodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
+func (s *TokenDecoder) DecodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
 	return s.decodeToken(accessToken)
 }
 
-func (s *TokenManager) decodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
-	token, err := jwt.ParseWithClaims(accessToken, &tokenClaim{
-		e: nil,
-		register: jwt.RegisteredClaims{
-			Issuer:    "",
-			Subject:   "",
-			Audience:  nil,
-			ExpiresAt: nil,
-			NotBefore: nil,
-			IssuedAt:  nil,
-			ID:        "",
-		},
-		ValuesMap: nil,
-	}, func(token *jwt.Token) (interface{}, error) {
-		_, ok := token.Method.(*jwt.SigningMethodHMAC)
-		if !ok {
-			return nil, s.e.ErrorOnly(ErrWrongTokenSigningMethod)
-		}
-
-		return []byte(s.secret), nil
-	})
+func (s *TokenDecoder) decodeToken(accessToken string) (*jwt.Token, TokenClaimValues, error) {
+	token, _, err := jwt.NewParser(jwt.WithoutClaimsValidation()).
+		ParseUnverified(accessToken, &tokenClaim{
+			e: nil,
+			register: jwt.RegisteredClaims{
+				Issuer:    "",
+				Subject:   "",
+				Audience:  nil,
+				ExpiresAt: nil,
+				NotBefore: nil,
+				IssuedAt:  nil,
+				ID:        "",
+			}})
 	if err != nil {
 		return nil, nil, s.e.ErrorOnly(err)
 	}
@@ -109,29 +77,8 @@ func (s *TokenManager) decodeToken(accessToken string) (*jwt.Token, TokenClaimVa
 	return token, claim.GetAllData(), nil
 }
 
-func (s *TokenManager) GenerateJWT(expiredAt time.Time, values ...Field) (string, error) {
-	claimBuilder := newTokenClaimBuilder(s.e, expiredAt)
-
-	err := claimBuilder.AddValues(values...)
-	if err != nil {
-		return "", s.e.Error(err, "unable to add values to token claim")
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claimBuilder)
-
-	signed, err := token.SignedString([]byte(s.secret))
-	if err != nil {
-		return "", s.e.ErrorOnly(err, "unable to get signed string")
-	}
-
-	return signed, nil
-}
-
-func NewJWTManger(errFmtSvc errorFormatterService,
-	secret string,
-) *TokenManager {
-	return &TokenManager{
-		e:      errFmtSvc,
-		secret: secret,
+func NewJWTDecoder(errFmtSvc errorFormatterService) *TokenDecoder {
+	return &TokenDecoder{
+		e: errFmtSvc,
 	}
 }

@@ -182,12 +182,30 @@ func main() {
 		log.Fatalf("unable to scan data from JWT token to struct. Error: %v ", err.Error())
 	}
 
+	tokenDecode := jwttool.NewJWTDecoder(mockerrors.NewMockErrFormatter())
+	_, claimValuesData, err := tokenDecode.DecodeToken(token)
+	if err != nil {
+		log.Fatalf("unable to get data from JWT token by JWTDecoder. Error:  %v ", err.Error())
+	}
+
+	fullTokenInfoCaseTwo := installmentTokenInfo{}
+	err = claimValuesData.ScanToStruct(&fullTokenInfoCaseTwo)
+	if err != nil {
+		log.Fatalf("unable to scan data from JWT token to struct. Error: %v ", err.Error())
+	}
+
 	log.Println("Origin data from token: ", instUUID, expitedAt, domainsResultList)
 	log.Println(
-		"Scanned data from token: ",
+		"Scanned data from token in  first test-case: ",
 		fullTokenInfo.uuid,
 		fullTokenInfo.expiration,
 		fullTokenInfo.domains,
+	)
+	log.Println(
+		"Scanned data from token in second test-case: ",
+		fullTokenInfoCaseTwo.uuid,
+		fullTokenInfoCaseTwo.expiration,
+		fullTokenInfoCaseTwo.domains,
 	)
 	log.Println("Token hash: ", fmt.Sprintf("%x", sha256.Sum256([]byte(token))))
 }
