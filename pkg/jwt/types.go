@@ -35,7 +35,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 //go:generate easyjson types.go
@@ -105,13 +105,32 @@ type tokenClaim struct {
 	register jwt.RegisteredClaims  `json:"-"`
 }
 
-func (c *tokenClaim) Valid() error {
-	err := c.register.Valid()
-	if err != nil {
-		return c.e.ErrorOnly(err)
-	}
+// func (c *tokenClaim) Valid() error {
+//	err := c.register.
+//	if err != nil {
+//		return c.e.ErrorOnly(err)
+//	}
+//
+//	return nil
+//}
 
-	return nil
+func (c *tokenClaim) GetExpirationTime() (*jwt.NumericDate, error) {
+	return c.register.ExpiresAt, nil
+}
+func (c *tokenClaim) GetIssuedAt() (*jwt.NumericDate, error) {
+	return c.register.IssuedAt, nil
+}
+func (c *tokenClaim) GetNotBefore() (*jwt.NumericDate, error) {
+	return c.register.NotBefore, nil
+}
+func (c *tokenClaim) GetIssuer() (string, error) {
+	return c.register.Issuer, nil
+}
+func (c *tokenClaim) GetSubject() (string, error) {
+	return c.register.Subject, nil
+}
+func (c *tokenClaim) GetAudience() (jwt.ClaimStrings, error) {
+	return c.register.Audience, nil
 }
 
 func (c *tokenClaim) GetAllData() TokenClaimValues {

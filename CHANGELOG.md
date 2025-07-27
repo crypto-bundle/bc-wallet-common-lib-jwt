@@ -1,5 +1,13 @@
 # Change Log
 
+## [v0.0.10] - 27.07.2025
+### Added
+* Separate JWT workflow logic on two independent service-components%
+  * JWT-decoder
+  * JWT-manager
+### Changed
+* Bump golang-jwt/jwt version to - v5.2.3 - `golang-jwt/jwt/v5`
+
 ## [v0.0.7, v0.0.8, v0.0.9] - 23.07.2025
 ### Added
 * Extended token claim data - added "Fields" management
